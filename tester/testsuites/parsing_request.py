@@ -1,4 +1,3 @@
-import config
 from http import HTTPStatus
 from tester.httpserver.httpserver import * 
 
