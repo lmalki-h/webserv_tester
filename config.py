@@ -1,3 +1,4 @@
 SERVER_ADDR = "localhost"
 SERVER_PORT = 8080
 HOSTPORT = "localhost:8080"
+MAX_URI_LENGTH = 2048

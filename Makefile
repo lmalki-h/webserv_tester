@@ -1,16 +1,14 @@
 
 
-.PHONY: init leaks test siege
+.PHONY: init leaks sample siege
 
-all : $(NAME)
+all: $(NAME)
 
 
-test: $(SAMPLE_FILE_TAR)
-	tar -tvzf $(SAMPLE_FILE_TAR)
+sample: 
+	tar -zxvf sample/sandbox.tar.gz
 
-clear:
-
-siege:
+siege: $(WEBSERV)
 	tar -zxvf siege.tar.gz
 	cd siege/
 	siege localhost:8080
