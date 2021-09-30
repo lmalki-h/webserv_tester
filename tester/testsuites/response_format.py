@@ -39,7 +39,7 @@ def test_payload(response, mime_type, content_length) -> str :
     if response.getheader("Content-Type") != mime_type:
         errors += "Expected {} got {}\n".format(mime_type, response.getheader("Content-Type"))
     if int(response.getheader("Content-Length")) != content_length:
-        errors += "Expected {} got {} ".format(str(content_length), response.getheader("Content-Length"))
+        errors += "Expected {} got {} ".format(content_length, response.getheader("Content-Length"))
     return errors
 
 # connection: https://datatracker.ietf.org/doc/html/rfc7230#section-6.1

@@ -2,6 +2,7 @@
 
 .PHONY: init leaks sample siege
 
+OPTION = ""
 all: $(NAME)
 
 
@@ -18,3 +19,4 @@ init:
 
 leaks:
 	valgrind ./$(NAME)
+	

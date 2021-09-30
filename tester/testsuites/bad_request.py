@@ -33,7 +33,7 @@ def test_malformed_start_line2() -> str:
 
 # headers: https://datatracker.ietf.org/doc/html/rfc7230#section-3.2
 
-def test_malformed_header() -> str:
+def test_malformed_header2() -> str:
     request = "GET /foo HTTP/1.1\r\nHost: tester\r\nHeader with missing colon\r\n\r\n"
     response = connect_send_receive(request)
     return test_response(response, HTTPStatus.BAD_REQUEST)
@@ -49,9 +49,12 @@ def test_missing_header_name() -> str:
     return test_response(response, HTTPStatus.BAD_REQUEST)
 
 def test_malformed_header() -> str:
+    errors = ""
     request = "GET / HTTP/1.1\r\nHost : LOL\r\n\r\n"
     response = connect_send_receive(request)
-    return test_response(response, HTTPStatus.BAD_REQUEST)
+    errors += test_response(response, HTTPStatus.BAD_REQUEST)
+    errors += test_payload(response, "text/html", 119)
+    return errors
 
 def test_missing_header_body() -> str:
     request = "POST /upload/test HTTP/1.1\r\nHost : LOL\r\n\r\n"

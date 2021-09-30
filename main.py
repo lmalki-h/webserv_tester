@@ -4,8 +4,14 @@ import os
 import sys
 from typing import Callable
 
-from tester.testsuites.parsing_request import *
-from tester.testsuites.basic_test import *
+from tester.testsuites.bad_request import *
+from tester.testsuites.delete_request import *
+from tester.testsuites.get_request import *
+from tester.testsuites.internal_server_error import *
+from tester.testsuites.payload_too_large import *
+from tester.testsuites.unsupported_version import *
+from tester.testsuites.uri_too_long import *
+
 import config
 
 #colors
@@ -48,20 +54,19 @@ def colorize(s: str, code=37) -> str :
 def run_test(test_description: str, test: Callable):
     try:
         result = test()
+        if len(result) == 0:
+            print(f"{colorize(test_description):<100}{'✅':>2}")
+            # print("• {} ✅".format(colorize(test_description)))
+        else:
+            print(f"{colorize(test_description):<100}{'❌':>2}")
+            # print("• {} ❌".format(colorize(test_description)))
+            print()
+            print("   {}".format(colorize(result, 91)))
     except Exception as e:
         print(e)
-    if len(result) == 0:
-        print(f"{colorize(test_description):<100}{'✅':>2}")
-        # print("• {} ✅".format(colorize(test_description)))
-    else:
-        print(f"{colorize(test_description):<100}{'❌':>2}")
-        # print("• {} ❌".format(colorize(test_description)))
-        print()
-        print("   {}".format(colorize(result, 91)))
     print() 
 
-def run() -> None :
-
+def run_malformed_request() -> None:
     try:
         print("{}{} ------------------------------------------- Tests with malformed request ----------------------------------- {}".format(C_B_BLUE, B_BLACK, RESET))
         """These tests can be found in tester/testsuites/parsing_request.py"""
@@ -74,14 +79,14 @@ def run() -> None :
         # run_test("Test whether a request with an invalid host header returns a 400", test_invalid_host)
 
         run_test("Test whether a request with unsupported version returns 505", test_unsupported_http_version)
-        run_test("Test whether a request with a header missing colon returns 400", test_malformed_header)
+        run_test("Test whether a request with a header missing colon returns 400", test_malformed_header2)
+        run_test("Test whether a request with header with extra space returns 400", test_malformed_header)
         run_test("Test whether a request without a host returns 400", test_missing_host_header)
         run_test("Test wehther a request with duplicate host returns 400", test_duplicate_host_header)
         run_test("Test wehther a request with two host headers returns 400", test_multiple_host_header)
-        run_test("Test whether a request with malformed header returns 400", test_missing_header_name)
+        run_test("Test whether a request with header missing name returns 400", test_missing_header_name)
         run_test("Test whether a request with malformed method returns 400", test_malformed_start_line)
         run_test("Test whether a request with malformed start line returns 400", test_malformed_start_line2)
-        run_test("Test whether a request with malformed header returns 400", test_malformed_header)
         # run_test("Test whether a request with body size superior to max returns 400", test_max_body_size)
         run_test("Test whether a request with body and missing header returns 400", test_missing_header_body)
         run_test("Test whether returns a file with multiple dot returns properly", test_xml_file)
@@ -93,65 +98,105 @@ def run() -> None :
         # run_test("Test whether a request with valid content-length but no body returns ")
         print()
         print()
+    except Exception as e:
+        print(colorize(e))
+
+def run_get_tests() -> None:
+    try:
         print("{}{} ------------------------------------------- Tests for GET request ------------------------------------------ {}".format(C_B_BLUE, B_BLACK, RESET))    
         """These tests can be found in tester/testsuites/basic_test.py"""
         
         print()
         run_test("Simple test with html page", test_get_url_ok)
-        run_test("Test whether returns a gif properly", test_gif_file)
-        run_test("Test whether returns a jpg properly", test_jpeg_file)
-        run_test("Test whether returns a jpeg properly", test_jpg_file)
-        run_test("Test whether returns a png properly", test_png_file)
+        run_test("Test whether a request returns a gif properly", test_gif_file)
+        run_test("Test whether a request returns a jpg properly", test_jpeg_file)
+        run_test("Test whether a request returns a jpeg properly", test_jpg_file)
+        run_test("Test whether a request returns a png properly", test_png_file)
+        run_test("Test whether a request returns an empty file with content-length = 0", test_get_empty_file)
+        run_test("Test whether returns a 405 on protected dir", test_get_not_allowed)
+        run_test("Test whether a request on empty dir returns 200 with content-length = 0", test_get_empty_dir)
+        run_test("Test whether a request on dir with index returns index", test_get_dir_with_index)
+        run_test("Test whether a request returns a xml properly", test_xml_file)
         # tester la requete get
-            # tester un get correcte
-            # tester un get sur une target non existante
-            # tester un get sur une target protege
-            # tester un get not allowed
-            # tester un get sur une target supprime
-            # tester un get sur un dir sans index
-            # tester un get sur un dir avec index 
             # tester un get dir sur autoindex           
-        # run_test("Test whether a request to an empty dir returns a 200 with content-length 0", test_empty_dir)
+        print()
+        print()
+    except Exception as e:
+        print(colorize(e))
+    
+def run_post_tests() -> None:
+    try:
         print("{}{} ------------------------------------------- Tests for POST request ----------------------------------------- {}".format(C_B_BLUE, B_BLACK, RESET))
+        print()
+        
         # tester la requete post
             # tester un post avec une query encode
             # tester un post avec une query non encode
-            # tester un post not allowed
             # tester un post sur une target non existante
             # tester un post correcte
             # tester un post correcte avec un fichier de 10M bytes
-    
+
+        print()
+        print()
+    except Exception as e:
+        print(colorize(e))
+
+def run_delete_tests() -> None:
+    try:
         print("{}{} ------------------------------------------- Tests for DELETE request --------------------------------------- {}".format(C_B_BLUE, B_BLACK, RESET))
         # tester la requete delete
-            # tester un delete correcte
-            # tester un delete sur une target non existante
-            # tester un delete sur une target protege
-            # tester un delete not allowed
-            # tester un delete sur une target deja supprime
-    
+        run_test("Test whether properly delete a file", test_delete_ok)
+        run_test("Test whether returns a 405 on protected dir", test_delete_not_allowed)
+        run_test("Test whether returns a 404 on a missing file", test_delete_missing)
+        run_test("Test whether returns a 404 on a file already deleted", test_already_deleted)
+        run_test("Test whether properly delete a directory", test_delete_dir)
+
+        print()
+        print()
+    except Exception as e:
+        print(colorize(e))
+
+def run_cgi_tests() -> None:
+    try:
         print("{}{} ------------------------------------------- Tests CGI  ----------------------------------------------------- {}".format(C_B_BLUE, B_BLACK, RESET))
         # tester le cgi
             # tester surle cgi headers
 
+    except Exception as e:
+        print(colorize(e))
+
+def run_chunk_tests() -> None:
+    try:
         print("{}{} ------------------------------------------- Tests for chunk ------------------------------------------------ {}".format(C_B_BLUE, B_BLACK, RESET))
         # tester le chunk
         # run_test("Test whether a request with content-length and transfer encoding chunk headers return ")
 
         print()
         print()
-        print("{}{} ------------------------------------------- User journey --------------------------------------------------- {}".format(C_B_BLUE, B_BLACK, RESET))
-        """These tests can be found in tester/testsuites/user_journey.py"""
-
-        print()
-        
-        
-        
-        print()
-        print()
-        print("{}{} ------------------------------------------- Stress test ---------------------------------------------------- {}".format(C_B_BLUE, B_BLACK, RESET))
-
     except Exception as e:
         print(colorize(e))
 
+def run() -> None :
+    run_malformed_request()
+    run_get_tests()
+    run_delete_tests()
+    run_post_tests()
+    run_cgi_tests()
+    run_chunk_tests()
+
+
 if __name__ == "__main__":
-    run()
+    if len(sys.argv) == 1:
+        run()
+    elif str(sys.argv[1]) == "syntax":
+        run_malformed_request()
+    elif str(sys.argv[1]) == "get":
+        run_get_tests()
+    elif str(sys.argv[1]) == "delete":
+        run_delete_tests()
+    elif str(sys.argv[1]) == "post":
+        run_post_tests()
+    elif str(sys.argv[1]) == "cgi":
+        run_cgi_tests()
+    elif str(sys.argv[1]) == "chunked":
+        run_chunk_tests()
