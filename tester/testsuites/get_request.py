@@ -59,7 +59,7 @@ def test_png_file() -> str:
     return errors
 
 def test_get_not_allowed() -> str:
-    request = "GET /protected/index.html HTTP/1.1\r\nHost: HOSTP\r\n\r\n"
+    request = "GET /protected/ HTTP/1.1\r\nHost: HOSTP\r\n\r\n"
     response = connect_send_receive(request)
     return test_response(response, HTTPStatus.METHOD_NOT_ALLOWED)
 
@@ -68,7 +68,7 @@ def test_get_empty_dir() -> str:
     request = "GET /emptydirectory HTTP/1.1\r\nHost: HOSTP\r\n\r\n"
     response = connect_send_receive(request)
     errors += test_response(response, HTTPStatus.OK)
-    errors += test_payload(response, "text/html", 0)
+    errors += test_payload(response, "text/plain", 0)
     return errors
 
 def test_get_dir_with_index() -> str:

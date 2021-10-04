@@ -15,7 +15,7 @@ def test_delete_ok() -> str:
     return test_response(response, HTTPStatus.OK)
 
 def test_delete_missing() -> str:
-    request = "DELETE /emptydir/missingfile.txt HTTP/1.1\r\nHost: LOL\r\n"
+    request = "DELETE /removeme/missingfile.txt HTTP/1.1\r\nHost: LOL\r\n\r\n"
     response = connect_send_receive(request)
     return test_response(response, HTTPStatus.NOT_FOUND)
 
